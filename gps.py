@@ -1,0 +1,1 @@
+#Denne filen inneholder metoder/funksjoner  tilknyttet GPS
