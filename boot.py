@@ -7,23 +7,26 @@ from machine import UART
 #Setter opp fysiske grensesnitt
 
 #Setter opp GPS kommunikasjon, men lar den sove
-gps = UART(2, 9600, rx=12, tx=27)
-gps.init(9600, rx=12, tx=27)
+#gps = UART(2, 9600, rx=12, tx=27)
+#gps.init(9600, rx=12, tx=27)
 gps_nrst = machine.Pin(21, machine.Pin.OUT)
 gps_nrst.value(0)
 
-#HPM partikkelsensor
-#hpm = UART(2, 9600, rx=25, tx=26)
-#hpm.init(9600, rx=25, tx=26)
+#HPM partikkelsensor i kun skrivemodus for å unngå å blir overhumplet av data
+#hpm = UART(2, 9600, rx=32, tx=26)
+#hpm.init(9600, rx=32, tx=26)
 #hpm.flush()
 #hpm.read()
-#gps.read()
+#hpm.write(bytes([0x68, 0x01, 0x20, 0x77])) #Stop auto send
 
-#gps.flush()
-#stillemodus = UART(2, 9600, rx=32, tx=33)
-#stillemodus.init(9600, rx=32, tx=33)
-#stillemodus.flush()
-#stillemodus.read()
+#Setter HPM i skrive og lesemodus
+hpm = UART(2, 9600, rx=25, tx=26)
+hpm.init(9600, rx=25, tx=26)
+hpm.flush()
+hpm.write(bytes([0x68, 0x01, 0x20, 0x77])) #Stop auto send
+hpm.flush()
+hpm.write(bytes([0x68, 0x01, 0x01, 0x96])) #Start målinger (ikke autosend)
+
 
 #lora
 lora = UART(1, 57600, rx=16, tx=17)
@@ -116,15 +119,5 @@ print("Lora ABP TTN info : " + lora_return("mac join abp"))
 #time.sleep(10)
 print("Lora ABP TTN join status: " + lora_read())
 print("Sender confirmed melding: " + lora_return("mac tx cnf 1 FAFAFA"))
-
-#GPS initilisering
-print("Aktiverer GPS, flusher og leser ut eventuell data i bufferet:")
-gps_nrst.value(1)
-gps.flush()
-time.sleep(2)
-print(gps_readln())
-
-#Partikkel initialisering
-
 
 print("-----------Boot.py ferdig------------")
