@@ -6,6 +6,25 @@ from machine import UART
 
 #Setter opp fysiske grensesnitt
 
+#Setter opp GPS kommunikasjon, men lar den sove
+gps = UART(2, 9600, rx=12, tx=27)
+gps.init(9600, rx=12, tx=27)
+gps_nrst = machine.Pin(21, machine.Pin.OUT)
+gps_nrst.value(0)
+
+#HPM partikkelsensor
+#hpm = UART(2, 9600, rx=25, tx=26)
+#hpm.init(9600, rx=25, tx=26)
+#hpm.flush()
+#hpm.read()
+#gps.read()
+
+#gps.flush()
+#stillemodus = UART(2, 9600, rx=32, tx=33)
+#stillemodus.init(9600, rx=32, tx=33)
+#stillemodus.flush()
+#stillemodus.read()
+
 #lora
 lora = UART(1, 57600, rx=16, tx=17)
 lora.init(57600, rx=16, tx=17)
@@ -34,6 +53,12 @@ def lora_return( inndata ):
     lora.write(utdata)
     time.sleep(1)
     inndata = str(lora.readln())
+    utdata = inndata.replace("\r\n", "")
+    return utdata
+
+#Funksjon for å lese en linje fra GPS \r\n
+def gps_readln():
+    inndata = str(gps.readln())
     utdata = inndata.replace("\r\n", "")
     return utdata
 
@@ -89,7 +114,17 @@ lora_return("mac set appskey AC2F3543F86E63382E78580D80D6E477")
 print("Lora ABP TTN info : " + lora_return("mac join abp"))
 
 #time.sleep(10)
-print("Lora OTAA TTN join status: " + lora_read())
+print("Lora ABP TTN join status: " + lora_read())
 print("Sender confirmed melding: " + lora_return("mac tx cnf 1 FAFAFA"))
+
+#GPS initilisering
+print("Aktiverer GPS, flusher og leser ut eventuell data i bufferet:")
+gps_nrst.value(1)
+gps.flush()
+time.sleep(2)
+print(gps_readln())
+
+#Partikkel initialisering
+
 
 print("-----------Boot.py ferdig------------")
